@@ -1,0 +1,5 @@
+[
+    { "userId": 1, "title": "Пост від user 1", "body": "Текст", "expectedName": "Leanne Graham" },
+    { "userId": 3, "title": "Пост від user 3", "body": "Текст", "expectedName": "Clementine Bauch" },
+    { "userId": 5, "title": "Пост від user 5", "body": "Текст", "expectedName": "Chelsey Dietrich" }
+]

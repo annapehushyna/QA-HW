@@ -1,0 +1,1013 @@
+{
+	"info": {
+		"_postman_id": "f53a2ce3-9179-4444-9dd5-8742406d2c91",
+		"name": "JSONPlaceholder Homework",
+		"description": "# Домашнє завдання — Секції 1–8\n\n**API:** https://jsonplaceholder.typicode.com\n\nПокриває базові та середні теми Лекцій 1–2.\nФінальний флоу (секція 9) знаходиться в окремій колекції:\n`JSONPlaceholder Homework - Flow.postman_collection.json`\n\n## Запуск\n```bash\n# Секції 1–4, 6–8 — без data-файлу\nnewman run \"JSONPlaceholder Homework.postman_collection.json\"\n\n# Секція 5 — з data-файлом\nnewman run \"JSONPlaceholder Homework.postman_collection.json\" \\\n  --folder \"5. Data-driven тестування\" -d test-data/homework-data.json\n```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9151059"
+	},
+	"item": [
+		{
+			"name": "1. HTTP-методи",
+			"item": [
+				{
+					"name": "HW 1.1 — GET /posts (список усіх постів)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 1.1a — Статус 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"✅ 1.1b — Відповідь є масивом з 100 елементів\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(Array.isArray(jsonData)).to.be.true;",
+									"    pm.expect(jsonData).to.have.lengthOf(100);",
+									"});",
+									"",
+									"pm.test(\"✅ 1.1c — Перший пост має поля id, userId, title, body\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const firstItem = jsonData[0];",
+									"    pm.expect(firstItem).to.have.all.keys(\"id\", \"userId\", \"title\", \"body\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							]
+						},
+						"description": "Отримай список усіх постів. Перевір структуру відповіді та кількість елементів.\n\n**Лекція 1, секція 1–2.** Базовий GET-запит + pm.test + Chai assertions."
+					},
+					"response": []
+				},
+				{
+					"name": "HW 1.2 — POST /posts (створення поста)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const dynamicTitle = \"Тестовий пост #\" + Date.now();",
+									"pm.collectionVariables.set(\"testTitle\", dynamicTitle);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 1.2a — Статус 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"✅ 1.2b — Відповідь містить поле id\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.exist;",
+									"    pm.expect(jsonData.id).to.not.equal(0);",
+									"});",
+									"",
+									"pm.test(\"✅ 1.2c — Title у відповіді відповідає відправленому\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const expectedTitle = pm.collectionVariables.get(\"testTitle\");",
+									"    pm.expect(jsonData.title).to.equal(expectedTitle);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"{{testTitle}}\",\n  \"body\": \"Тіло тестового поста\",\n  \"userId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							]
+						},
+						"description": "Відправ POST-запит для створення нового поста. Title береться з collection variable testTitle, яку треба встановити у pre-request скрипті.\n\n**Лекція 1, секція 3–5.**"
+					},
+					"response": []
+				},
+				{
+					"name": "HW 1.3 — DELETE /posts/1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 1.3a — Статус 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"✅ 1.3b — Тіло відповіді є порожнім об'єктом {}\", function () {",
+									"    pm.expect(pm.response.json()).to.eql({});",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts/98",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								"98"
+							]
+						},
+						"description": "Видали пост. JSONPlaceholder відповідає 200 і порожнім тілом {}.\n\n**Лекція 1, секція 4.**"
+					},
+					"response": []
+				}
+			],
+			"description": "Завдання 1.1–1.3. Охоплює GET, POST і DELETE запити. Лекція 1, секції 1–4."
+		},
+		{
+			"name": "2. Параметри та заголовки",
+			"item": [
+				{
+					"name": "HW 2.1 — GET /comments?postId=3 (query-параметри)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 2.1a — Статус 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"✅ 2.1b — Масив не порожній\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(Array.isArray(jsonData)).to.be.true;",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"});",
+									"",
+									"pm.test(\"✅ 2.1c — Усі коментарі належать постові postId=3\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    jsonData.forEach(function (comment, index) {",
+									"        pm.expect(comment.postId, `Елемент з індексом [${index}] має некоректний postId`).to.equal(3);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/comments?postId=3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"comments"
+							],
+							"query": [
+								{
+									"key": "postId",
+									"value": "3"
+								}
+							]
+						},
+						"description": "Фільтрація за query-параметром postId=3. Переконайся, що API справді повертає тільки потрібні записи.\n\n**Лекція 1, секція 2.**"
+					},
+					"response": []
+				},
+				{
+					"name": "HW 2.2 — GET /posts/1 з кастомним заголовком",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// ✏️  ЗАВДАННЯ 2.2 — Pre-request",
+									"// Виводимо заголовки до відправки запиту.",
+									"// Зверни увагу: тут заголовки видно.",
+									"console.log(\"Заголовки запиту (pre-request):\", pm.request.headers.toObject());",
+									"",
+									"// TODO: Додай заголовок X-Student-Name у вкладці Headers цього запиту (не в скрипті).",
+									"// Після запуску переконайся, що він видно у виводі вище."
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 2.2 — Статус 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(\"Response headers:\", pm.response.headers.toObject());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Student-Name",
+								"value": "Hanna"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/posts/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								"1"
+							]
+						},
+						"description": "Додай кастомний заголовок X-Student-Name до запиту. У Postman Console (Alt+Ctrl+C) перевір, що він відправляється разом із запитом.\n\nВідкрий вкладку Headers у запиті і додай: Key = X-Student-Name, Value = своє_ім'я.\n\n**Лекція 1, секція 5.**"
+					},
+					"response": []
+				}
+			],
+			"description": "Завдання 2.1–2.2. Query-параметри та кастомні заголовки. Лекція 1, секції 2, 5."
+		},
+		{
+			"name": "3. Змінні та ланцюжки запитів",
+			"item": [
+				{
+					"name": "HW 3.1 — GET /users/{{randomUserId}} (pre-request генерація)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const userId = Math.floor(Math.random() * 10) + 1;",
+									"",
+									"pm.collectionVariables.set(\"randomUserId\", userId.toString());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 3.1a — Статус 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"✅ 3.1b — id користувача збігається з randomUserId\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const expectedId = parseInt(pm.collectionVariables.get(\"randomUserId\"), 10);",
+									"    ",
+									"    pm.expect(jsonData.id).to.equal(expectedId);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{randomUserId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{randomUserId}}"
+							]
+						},
+						"description": "Pre-request скрипт генерує випадковий userId (1–10) і зберігає в collection variable. URL підставляє {{randomUserId}} автоматично.\n\n**Лекція 1, секція 6.**"
+					},
+					"response": []
+				},
+				{
+					"name": "HW 3.2a — POST /posts → збережи id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 3.2a — Статус 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"✅ 3.2a — Зберегли createdPostId\", function () {",
+									"    const id = pm.response.json().id;",
+									"  ",
+									"    pm.collectionVariables.set(\"createdPostId\", id.toString());",
+									"    ",
+									"    console.log(\"Збережено createdPostId:\", id);",
+									"    pm.expect(id).to.be.a(\"number\");",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Тест ланцюжка\",\n  \"body\": \"Тіло поста\",\n  \"userId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							]
+						},
+						"description": "Крок 1 ланцюжка. Створюємо пост і зберігаємо його id для наступного запиту.\n\n**Лекція 1, секція 7.**"
+					},
+					"response": []
+				},
+				{
+					"name": "HW 3.2b — GET /posts/{{createdPostId}} → перевір id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 3.2b — Статус 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"✅ 3.2b — id поста збігається зі збереженим createdPostId\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const expectedId = parseInt(pm.collectionVariables.get(\"createdPostId\"), 10);",
+									"    ",
+									"    pm.expect(jsonData.id).to.equal(expectedId);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts/{{createdPostId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								"{{createdPostId}}"
+							]
+						},
+						"description": "Крок 2 ланцюжка. URL містить {{createdPostId}} — значення, збережене в запиті 3.2a.\n\n**Лекція 1, секція 7.**"
+					},
+					"response": []
+				}
+			],
+			"description": "Завдання 3.1–3.2. Collection variables, pre-request генерація, ланцюжки. Лекція 1, секції 6–7."
+		},
+		{
+			"name": "4. Assertions та JSON Schema",
+			"item": [
+				{
+					"name": "HW 4.1 — GET /users/1 (різні методи Chai)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 4.1 — Комплексна перевірка даних користувача\", function () {",
+									"    const json = pm.response.json();",
+									"",
+									"    pm.expect(json).to.have.property(\"username\");",
+									"",
+									"    pm.expect(json.email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);",
+									"",
+									"    pm.expect(json.name).to.include(\" \"); ",
+									"    pm.expect(json.id).to.equal(1);",
+									"",
+									"    pm.expect(json.company).to.eql({",
+									"        \"name\": json.company.name,",
+									"        \"catchPhrase\": json.company.catchPhrase,",
+									"        \"bs\": json.company.bs",
+									"    });",
+									"});",
+									"",
+									"pm.test(\"✅ 4.1 — Статус 200\", () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"1"
+							]
+						},
+						"description": "Напиши мінімум 5 assertions для GET /users/1, використовуючи різні методи Chai: .equal(), .eql(), .have.property(), .include(), .match().\n\n**Лекція 1, секція 8.**"
+					},
+					"response": []
+				},
+				{
+					"name": "HW 4.2 — GET /todos/1 (JSON Schema)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const schema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"userId\": { \"type\": \"number\" },",
+									"        \"id\": { \"type\": \"number\" },",
+									"        \"title\": { \"type\": \"string\" },",
+									"        \"completed\": { \"type\": \"boolean\" }",
+									"    },",
+									"    \"required\": [\"userId\", \"id\", \"title\", \"completed\"],",
+									"    \"additionalProperties\": false",
+									"};",
+									"",
+									"pm.test(\"✅ 4.2 — JSON Schema відповідає структурі /todos\", function () {",
+									"    pm.response.to.have.jsonSchema(schema);",
+									"});",
+									"",
+									"pm.test(\"✅ 4.2 — Статус 200\", () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/todos/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"todos",
+								"1"
+							]
+						},
+						"description": "Визнач JSON Schema для ендпоінта /todos/1 і валідуй відповідь через pm.response.to.have.jsonSchema().\n\n**Лекція 1, секція 8.**"
+					},
+					"response": []
+				}
+			],
+			"description": "Завдання 4.1–4.2. Chai assertions та JSON Schema validation. Лекція 1, секція 8."
+		},
+		{
+			"name": "5. Data-driven тестування",
+			"item": [
+				{
+					"name": "HW 5.1 — GET /users/{{userId}} (з data-файлу)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 5.1 — Статус 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const expectedName = pm.iterationData.get(\"expectedName\");",
+									"",
+									"if (expectedName) {",
+									"    pm.test(\"✅ 5.1 — Ім'я збігається з файлом\", function () {",
+									"        pm.expect(pm.response.json().name).to.eql(expectedName);",
+									"    });",
+									"} else {",
+									"    console.log(\"expectedName відсутній — пропускаємо перевірку імені.\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
+						},
+						"description": "**ПЕРЕД ЗАПУСКОМ:** Створи файл test-data/homework-data.json такого формату:\n\n```json\n[\n    { \"userId\": 1, \"expectedName\": \"Leanne Graham\" },\n    { \"userId\": 3, \"expectedName\": \"Clementine Bauch\" },\n    { \"userId\": 5, \"expectedName\": \"Chelsey Dietrich\" }\n]\n```\n\nЗапусти через Newman:\n`newman run \"JSONPlaceholder Homework.postman_collection.json\" --folder \"5. Data-driven тестування\" -d test-data/homework-data.json`\n\nабо через Collection Runner: кнопка Run → вибери файл homework-data.json → Run.\n\n**Лекція 2, секція 2.**"
+					},
+					"response": []
+				},
+				{
+					"name": "HW 5.2 — POST /posts (з даними з файлу)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 5.2 — Статус 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"✅ 5.2 — userId у відповіді збігається з файлом\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const expectedUserId = parseInt(pm.iterationData.get(\"userId\"), 10);",
+									"    ",
+									"    pm.expect(jsonData.userId).to.equal(expectedUserId);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"{{title}}\",\n    \"body\": \"{{body}}\",\n    \"userId\": {{userId}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							]
+						},
+						"description": "Той самий data-файл — розшир його полями title та body для POST-запиту:\n\n```json\n[\n    { \"userId\": 1, \"title\": \"Пост від user 1\", \"body\": \"Текст\", \"expectedName\": \"Leanne Graham\" },\n    ...\n]\n```\n\n**Лекція 2, секція 2.**"
+					},
+					"response": []
+				}
+			],
+			"description": "Завдання 5.1–5.2. Data-driven testing з JSON-файлом через Collection Runner / Newman. Лекція 2, секція 2."
+		},
+		{
+			"name": "6. Авторизація (Bearer)",
+			"item": [
+				{
+					"name": "HW 6.1 — GET /posts/1 (Bearer auth від папки)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Перевіряємо, що токен встановлено.",
+									"// (Якщо немає — використовується значення зі списку variables колекції)",
+									"if (!pm.collectionVariables.get(\"apiToken\")) {",
+									"    pm.collectionVariables.set(\"apiToken\", \"student-demo-token\");",
+									"    console.log(\"apiToken встановлено за замовчуванням.\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 6.1 — Статус 200 (Bearer auth наслідується від папки)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(\"Authorization зі скрипта:\", pm.request.headers.get(\"Authorization\"));",
+									"console.log(\"Щоб побачити реальний header — відкрий Postman Console (Alt+Ctrl+C)\");",
+									"",
+									"// Скрипт виведе `undefined` тому що щб'єкт `pm.request` у скриптах бачить лише ті заголовки, які прописані вручну "
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								"1"
+							]
+						},
+						"description": "Ця папка має Bearer авторизацію з токеном {{apiToken}}. Запит наслідує її автоматично — нічого додаткового налаштовувати не треба.\n\nДосліди, чи видно Authorization header зі скрипта (підказка: ні — і лекція 2 пояснює чому).\n\n**Лекція 2, секція 4.**"
+					},
+					"response": []
+				}
+			],
+			"description": "Завдання 6.1. Bearer авторизація на рівні папки, наслідування у запиті. Лекція 2, секція 4.",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{apiToken}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "7. setNextRequest та потоки",
+			"item": [
+				{
+					"name": "HW 7.1a — GET /posts (перевір і вирішуй, що далі)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ 7.1a — Статус 200\", () => pm.response.to.have.status(200));",
+									"",
+									"const posts = pm.response.json();",
+									"",
+									"if (posts[0] && posts[0].userId === 1) {",
+									"    console.log(\"userId===1 → пропускаємо 7.1b, переходимо до 7.1c\");",
+									"    pm.execution.setNextRequest(\"HW 7.1c — GET /todos/1 (кінець потоку)\");",
+									"} else {",
+									"    console.log(\"userId!==1 → виконуємо по порядку\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts"
+							]
+						},
+						"description": "Перший крок потоку. Якщо перший пост має userId===1 — пропустити 7.1b і перейти одразу до 7.1c.\n\n`pm.execution.setNextRequest(\"назва_запиту\")` — назва повинна збігатись **точно** з полем name.\n\n⚠️ Запускай через **Collection Runner** або `newman run` — при одиночному Send setNextRequest ігнорується.\n\n**Лекція 2, секція 1.**"
+					},
+					"response": []
+				},
+				{
+					"name": "HW 7.1b — GET /users/1 (має бути ПРОПУЩЕНИЙ)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Цей запит має бути ПРОПУЩЕНИЙ якщо в 7.1a спрацювала умова.",
+									"// Якщо ти бачиш цей тест як FAILED — setNextRequest спрацював правильно.",
+									"// Якщо PASSED — перевір логіку в 7.1a.",
+									"",
+									"pm.test(\"❌ 7.1b НЕ повинен виконуватись (setNextRequest мав перескочити)\", function () {",
+									"    pm.expect.fail(\"Цей запит не мав виконуватись! Перевір setNextRequest у 7.1a.\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"1"
+							]
+						},
+						"description": "Цей запит **має бути пропущений** — якщо setNextRequest у 7.1a налаштований правильно, Collection Runner перескочить його.\n\nТест навмисно падає — це і є критерій успіху: якщо 7.1b **не виконався**, завдання виконано.\n\n**Лекція 2, секція 1.**"
+					},
+					"response": []
+				},
+				{
+					"name": "HW 7.1c — GET /todos/1 (кінець потоку)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Цей запит виконується завжди: або після 7.1a (через setNextRequest),",
+									"// або після 7.1b якщо перехід не спрацював.",
+									"",
+									"pm.test(\"✅ 7.1c — Кінець потоку, статус 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(\"7.1c виконано. Якщо 7.1b не виконувався — потік спрацював правильно! ✓\");"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/todos/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"todos",
+								"1"
+							]
+						},
+						"description": "Кінцева точка потоку. Виконується незалежно від того, чи була пропущена 7.1b.\n\n**Лекція 2, секція 1.**"
+					},
+					"response": []
+				}
+			],
+			"description": "Завдання 7.1. setNextRequest: умовне пропускання кроку. ⚠️ Запускати через Collection Runner або Newman! Лекція 2, секція 1."
+		},
+		{
+			"name": "8. Async-тести та helpers",
+			"item": [
+				{
+					"name": "HW 8.1 — GET /posts/1 + pm.sendRequest всередині тесту",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"✅ 8.1 — Статус основного запиту 200\", () => pm.response.to.have.status(200));",
+									"",
+									"pm.test(\"✅ 8.1 — Async: userId поста === 1 (users/1 існує)\", function (done) {",
+									"    const postUserId = pm.response.json().userId;",
+									"    const baseUrl = pm.collectionVariables.get(\"baseUrl\");",
+									"    const requestUrl = `${baseUrl}/users/${postUserId}`;",
+									"",
+									"    pm.sendRequest(requestUrl, function (err, res) {",
+									"        if (err) { ",
+									"            done(err); ",
+									"            return; ",
+									"        }",
+									"        pm.expect(res.code).to.eql(200);",
+									"        const userData = res.json();",
+									"        pm.expect(userData.id).to.equal(postUserId);",
+									"        done();",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/posts/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"posts",
+								"1"
+							]
+						},
+						"description": "Продемонструй правильний async-тест: pm.sendRequest() всередині pm.test() з параметром `done`.\n\nБез `done` тест буде завжди зеленим, навіть якщо assertion всередині кидає помилку — тому параметр done обов'язковий для async-перевірок.\n\n**Лекція 2, секція 10.**"
+					},
+					"response": []
+				},
+				{
+					"name": "HW 8.2 — GET /users/1 (helpers qa.*)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// qa визначений на рівні КОЛЕКЦІЇ — тут він вже доступний.",
+									"// Щоб переконатись:",
+									"console.log(\"qa доступний:\", typeof qa);",
+									"console.log(\"Методи:\", Object.keys(qa).join(\", \"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// ✏️  ЗАВДАННЯ 8.2",
+									"// Об'єкт \"qa\" визначений у pre-request КОЛЕКЦІЇ через bare assignment.",
+									"// Він доступний в усіх запитах колекції.",
+									"pm.test(\"✅ 8.2 — Статус 200\", () => pm.response.to.have.status(200));",
+									"",
+									"console.log(\"Random email:\", qa.randomEmail());",
+									"console.log(\"Random int 1-100:\", qa.randomInt(1, 100));",
+									"qa.logResponse(\"HW-8.2\", pm.response);",
+									"qa.formatUser = (json) => `id: ${json.id}, name: ${json.name}`;",
+									"console.log(\"Formatted User:\", qa.formatUser(pm.response.json()));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"1"
+							]
+						},
+						"description": "Використай об'єкт `qa` — він визначений на рівні колекції через bare assignment (без var/let/const), що робить його глобальним у sandbox'і і доступним з будь-якого скрипта колекції.\n\nВиклич мінімум 3 методи і перевір результати у Postman Console.\n\n**Лекція 2, секція 11.**"
+					},
+					"response": []
+				}
+			],
+			"description": "Завдання 8.1–8.2. Async-тести з done() та helpers-об'єкт qa. Лекція 2, секції 10–11."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Helpers — доступні в усіх запитах через bare assignment (без var/let/const).",
+					"// Саме завдяки відсутності 'var' ці функції стають глобальними в sandbox'і.",
+					"// Спробуй: у будь-якому test-скрипті виклич qa.randomEmail() або qa.randomInt(1, 10).",
+					"qa = {",
+					"    randomEmail: () => `qa+${Date.now()}@test.com`,",
+					"    randomInt: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min,",
+					"    logResponse: (label, res) => console.log(`[${label}] ${res.code} ${res.status} — ${res.responseTime}ms`),",
+					"    extractAndStore: (key, jsonPath) => {",
+					"        const value = jsonPath.split('.').reduce((o, k) => o && o[k], pm.response.json());",
+					"        pm.collectionVariables.set(key, value);",
+					"        console.log(`Збережено ${key} = ${value}`);",
+					"        return value;",
+					"    }",
+					"};"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://jsonplaceholder.typicode.com",
+			"type": "string"
+		},
+		{
+			"key": "testTitle",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "randomUserId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "createdPostId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "apiToken",
+			"value": "student-demo-token",
+			"type": "string"
+		}
+	]
+}
